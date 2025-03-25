@@ -1,0 +1,16 @@
+<html>
+<body>
+    <h2>New Booking Alert</h2>
+    <p>A new appointment has been booked:</p>
+    <ul>
+        <li>Customer: {{ booking.customer.name }}</li>
+        <li>Date: {{ booking.date.strftime('%B %d, %Y') }}</li>
+        <li>Time: {{ booking.time }}</li>
+        <li>Service: {{ booking.service.name }}</li>
+        <li>Contact: {{ booking.customer.phone }} / {{ booking.customer.email }}</li>
+        {% if booking.notes %}
+        <li>Special Requests: {{ booking.notes }}</li>
+        {% endif %}
+    </ul>
+</body>
+</html>

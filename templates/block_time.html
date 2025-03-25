@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Block Time Slot{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Block Time Slot</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.csrf_token }}
+                        
+                        <div class="mb-3">
+                            <label for="date" class="form-label">Date</label>
+                            {{ form.date(class="form-control", id="date", type="date") }}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="start_time" class="form-label">Start Time</label>
+                                {{ form.start_time(class="form-control", id="start_time") }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="end_time" class="form-label">End Time</label>
+                                {{ form.end_time(class="form-control", id="end_time") }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="reason" class="form-label">Reason (Optional)</label>
+                            {{ form.reason(class="form-control", id="reason") }}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Block Time Slot</button>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Set minimum date to today
+    document.getElementById('date').min = new Date().toISOString().split('T')[0];
+
+    // Ensure end time is always after start time
+    document.getElementById('start_time').addEventListener('change', function() {
+        var startTime = this.value;
+        var endTimeSelect = document.getElementById('end_time');
+        var endTimeOptions = endTimeSelect.options;
+        
+        for (var i = 0; i < endTimeOptions.length; i++) {
+            var option = endTimeOptions[i];
+            option.disabled = option.value <= startTime;
+            if (option.value <= startTime && option.selected) {
+                endTimeSelect.value = endTimeOptions[i + 1].value;
+            }
+        }
+    });
+</script>
+{% endblock %} 

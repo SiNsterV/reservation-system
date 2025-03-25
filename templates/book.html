@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}Book Appointment{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card animated-card">
+                <div class="card-header">
+                    <h4 class="mb-0">Book Your Appointment</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.csrf_token }}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="date" class="form-label">Date</label>
+                                {{ form.date(class="form-control flatpickr", id="date", placeholder="Select Date") }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="time" class="form-label">Time</label>
+                                {{ form.time(class="form-control", id="time") }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="service" class="form-label">Service</label>
+                                {{ form.service(class="form-control", id="service") }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="barber" class="form-label">Barber</label>
+                                {{ form.barber(class="form-control", id="barber") }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Your Name</label>
+                            {{ form.name(class="form-control", id="name") }}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                {{ form.email(class="form-control", id="email", type="email") }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label">Phone</label>
+                                {{ form.phone(class="form-control", id="phone", type="tel", placeholder="Enter your phone number") }}
+                                <div class="form-text">Any format is accepted</div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Special Requests (Optional)</label>
+                            {{ form.notes(class="form-control", id="notes", rows="3") }}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary animated-button">Book Appointment</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Flatpickr CSS and JS for a better calendar -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+    // Initialize Flatpickr for the date input
+    flatpickr("#date", {
+        minDate: "today",
+        dateFormat: "Y-m-d",
+        disableMobile: true, // Better UX on desktop
+        theme: "light" // Optional: Use a theme for better appearance
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const timeSelect = document.getElementById('time');
+
+    // Add form submit handler
+    form.addEventListener('submit', function(e) {
+        const selectedOption = timeSelect.options[timeSelect.selectedIndex];
+        if (selectedOption.disabled) {
+            e.preventDefault();
+        }
+    });
+
+    // Clear time selection when disabled option is selected
+    timeSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        if (selectedOption.disabled) {
+            this.value = '';
+        }
+    });
+    });
+
+    // Function to update available times
+    function updateAvailableTimes() {
+        const dateInput = document.getElementById('date');
+        const barberSelect = document.getElementById('barber');
+        const timeSelect = document.getElementById('time');
+        
+        if (!dateInput.value || !barberSelect.value) return;
+        
+        fetch(`/get-available-times?date=${dateInput.value}&barber_id=${barberSelect.value}`)
+            .then(response => response.json())
+            .then(data => {
+                const timeOptions = timeSelect.options;
+                
+                // Enable all options first
+                for (let option of timeOptions) {
+                    option.disabled = false;
+                }
+                
+                // Disable booked times
+                if (data.booked_times) {
+                    data.booked_times.forEach(time => {
+                        for (let option of timeOptions) {
+                            if (option.value === time) {
+                                option.disabled = true;
+                            }
+                        }
+                    });
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    // Add event listeners
+    document.getElementById('date').addEventListener('change', updateAvailableTimes);
+    document.getElementById('barber').addEventListener('change', updateAvailableTimes);
+</script>
+
+<style>
+    /* Modern card animation */
+    .animated-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background: #fff;
+    }
+
+    .animated-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Button animation */
+    .animated-button {
+        background: linear-gradient(45deg, #4b4b4b, #272727);
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 25px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        font-weight: 600;
+    }
+
+    .animated-button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
+    }
+
+    /* Form input styling */
+    .form-control {
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        padding: 10px;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #272727;
+        box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+    }
+
+    /* Label styling */
+    .form-label {
+        font-weight: 600;
+        color: #333;
+    }
+
+    /* Card header styling */
+    .card-header {
+        background: linear-gradient(45deg, #4b4b4b, #272727);
+        color: white;
+        border-radius: 15px 15px 0 0;
+        padding: 20px;
+    }
+
+    /* Flatpickr calendar styling */
+    .flatpickr-input {
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 10px;
+        cursor: pointer;
+    }
+
+    .flatpickr-calendar {
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .flatpickr-day.selected {
+        background: #007bff;
+        border-color: #007bff;
+    }
+
+    .flatpickr-day.today {
+        border-color: #007bff;
+    }
+
+    /* Phone number input styling */
+    #phone {
+        font-family: inherit;
+    }
+</style>
+{% endblock %}

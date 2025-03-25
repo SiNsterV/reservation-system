@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome to Barber Shop{% endblock %}
+
+{% block content %}
+<div class="hero text-center">
+    <div class="container">
+        <h1 class="display-4">Welcome to Barber Shop</h1>
+        <p class="lead">Professional haircuts and grooming services for the modern gentleman</p>
+        <a href="{{ url_for('book') }}" class="btn btn-primary btn-lg">Book Now</a>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-scissors fs-1 text-primary mb-3"></i>
+                    <h3 class="card-title">Haircuts</h3>
+                    <p class="card-text">Professional haircuts tailored to your style and preferences.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-brush fs-1 text-primary mb-3"></i>
+                    <h3 class="card-title">Beard Trim</h3>
+                    <p class="card-text">Expert beard grooming and styling services.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-check fs-1 text-primary mb-3"></i>
+                    <h3 class="card-title">Easy Booking</h3>
+                    <p class="card-text">Book your appointment online with just a few clicks.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <h2>Why Choose Us?</h2>
+            <ul class="list-unstyled">
+                <li><i class="bi bi-check2-circle text-success"></i> Experienced professional barbers</li>
+                <li><i class="bi bi-check2-circle text-success"></i> Clean and modern facility</li>
+                <li><i class="bi bi-check2-circle text-success"></i> Convenient online booking</li>
+                <li><i class="bi bi-check2-circle text-success"></i> Competitive prices</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h2>Our Location</h2>
+            <div class="ratio ratio-16x9">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3024.2219901290355!2d-74.00369368400567!3d40.71312937933185!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25a23e28c1191%3A0x49f75d3281df052a!2s150%20Park%20Row%2C%20New%20York%2C%20NY%2010007!5e0!3m2!1sen!2sus!4v1644115241595!5m2!1sen!2sus" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,16 @@
+<html>
+<body>
+    <h2>Booking Cancelled</h2>
+    <p>Dear {{ booking.name }},</p>
+    <p>Your appointment is waiting for confimation:</p>
+    <ul>
+        <li>Date: {{ booking.date.strftime('%B %d, %Y') }}</li>
+        <li>Time: {{ booking.time }}</li>
+        <li>Service: {{ booking.service }}</li>
+        <li>Barber: {{ booking.barber }}</li>
+    </ul>
+    <p>If you want to schedule a new appointment, click the link below.</p>
+    <p><a href="http://127.0.0.1:5000/book">Schedule a new appointment.</a></p>
+    <p>Thank you for choosing our services!</p>
+</body>
+</html>

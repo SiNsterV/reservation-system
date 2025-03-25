@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Gallery - Barber Shop{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Our Work</h2>
+    
+    <div class="row g-4">
+        {% for item in gallery_items %}
+        <div class="col-md-4">
+            <div class="card gallery-card h-100">
+                <img src="{{ item.image_url }}" class="card-img-top gallery-img" alt="{{ item.title }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ item.title }}</h5>
+                    <p class="card-text">{{ item.description }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .gallery-card {
+        transition: transform 0.3s ease;
+        cursor: pointer;
+    }
+
+    .gallery-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .gallery-img {
+        height: 250px;
+        object-fit: cover;
+    }
+
+    .card {
+        border: none;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .card-body {
+        background: #f8f9fa;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}Barber Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>Welcome, {{ current_user.name }}</h2>
+                <a href="{{ url_for('block_time') }}" class="btn btn-primary">
+                    <i class="bi bi-calendar-x"></i> Block Time Slot
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Upcoming Appointments</h4>
+                </div>
+                <div class="card-body">
+                    {% if appointments %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Customer</th>
+                                    <th>Service</th>
+                                    <th>Contact</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in appointments %}
+                                <tr>
+                                    <td>{{ appointment.date.strftime('%Y-%m-%d') }}</td>
+                                    <td>{{ appointment.time.strftime('%H:%M') }}</td>
+                                    <td>{{ appointment.customer.name }}</td>
+                                    <td>{{ appointment.service.name }}</td>
+                                    <td>
+                                        <small>
+                                            <div><i class="bi bi-envelope"></i> {{ appointment.customer.email }}</div>
+                                            <div><i class="bi bi-telephone"></i> {{ appointment.customer.phone }}</div>
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ {
+                                            'pending': 'warning',
+                                            'confirmed': 'info',
+                                            'completed': 'success',
+                                            'cancelled': 'danger'
+                                        }[appointment.status] }}">
+                                            {{ appointment.status.title() }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                                Update Status
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <form action="{{ url_for('update_appointment_status', id=appointment.id) }}" method="POST" style="display: inline;">
+                                                        <input type="hidden" name="status" value="confirmed">
+                                                        <button type="submit" class="dropdown-item">Confirm</button>
+                                                    </form>
+                                                </li>
+                                                <li>
+                                                    <form action="{{ url_for('update_appointment_status', id=appointment.id) }}" method="POST" style="display: inline;">
+                                                        <input type="hidden" name="status" value="completed">
+                                                        <button type="submit" class="dropdown-item">Complete</button>
+                                                    </form>
+                                                </li>
+                                                <li>
+                                                    <form action="{{ url_for('update_appointment_status', id=appointment.id) }}" method="POST" style="display: inline;">
+                                                        <input type="hidden" name="status" value="cancelled">
+                                                        <button type="submit" class="dropdown-item text-danger">Cancel</button>
+                                                    </form>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% if appointment.notes %}
+                                <tr class="table-light">
+                                    <td colspan="7">
+                                        <small>
+                                            <strong>Notes:</strong> {{ appointment.notes }}
+                                        </small>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted my-4">No upcoming appointments</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Account Settings</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('update_email') }}" method="POST" class="row g-3 align-items-center">
+                        <div class="col-auto">
+                            <label for="email" class="col-form-label">Email Address</label>
+                        </div>
+                        <div class="col-auto">
+                            <input type="email" id="email" name="email" class="form-control" 
+                                   value="{{ current_user.email }}" required>
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-primary">Update Email</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+<div class="cleanup-section" style="margin: 20px 0;">
+    <form action="{{ url_for('cleanup_appointments') }}" method="POST">
+        <button type="submit" class="btn btn-warning" onclick="return confirm('Are you sure you want to delete all completed and cancelled appointments?')">
+            Clean Up Old Appointments
+        </button>
+    </form>
+</div>
+<div class="row mt-4">
+    <div class="col-md-12">
+        <h3>Blocked Times</h3>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Reason</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for block in blocked_times %}
+                    <tr>
+                        <td>{{ block.date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ block.start_time.strftime('%H:%M') }}</td>
+                        <td>{{ block.end_time.strftime('%H:%M') }}</td>
+                        <td>{{ block.reason }}</td>
+                        <td>
+                            <form action="{{ url_for('delete_block', id=block.id) }}" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i> Remove
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center">No blocked times</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %} 

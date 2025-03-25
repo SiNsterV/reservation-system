@@ -1,0 +1,16 @@
+<html>
+<body>
+    <h2>Booking Confirmation</h2>
+    <p>Dear {{ booking.customer.name }},</p>
+    <p>Your appointment is waiting for confirmation:</p>
+    <ul>
+        <li>Date: {{ booking.date.strftime('%B %d, %Y') }}</li>
+        <li>Time: {{ booking.time.strftime('%H:%M') }}</li>
+        <li>Service: {{ booking.service.name }}</li>
+        <li>Barber: {{ booking.barber.name }}</li>
+    </ul>
+    <p>If you need to cancel or reschedule follow the link below.</p>
+    <p><a href="">Cancel or reschedule (placeholder)</a></p>
+    <p>Thank you for choosing our services!</p>
+</body>
+</html>
