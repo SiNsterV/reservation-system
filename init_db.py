@@ -20,12 +20,6 @@ def init_db():
                 name="John Smith",
                 email="vojjta99@gmail.com"
             ),
-            Barber(
-                username="mike",
-                password=generate_password_hash("password123"),
-                name="Mike Johnson",
-                email="mike@barbershop.com"
-            )
         ]
 
         # Create services

@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}Booking Confirmed - ClipMaster Barber Shop{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card confirmation-card">
+                <div class="card-body text-center p-5">
+                    <div class="confirmation-icon mb-4">
+                        <i class="fas fa-check-circle text-success"></i>
+                    </div>
+                    
+                    <h1 class="mb-3">Booking Confirmed!</h1>
+                    <p class="lead mb-4">Thank you for booking with ClipMaster Barber Shop. We're looking forward to seeing you soon!</p>
+                    
+                    <div class="email-notification mb-4">
+                        <i class="fas fa-envelope"></i>
+                        <p>A confirmation email has been sent to <strong>{{ booking.email }}</strong></p>
+                    </div>
+                    
+                    <div class="booking-details mb-4">
+                        <h3 class="mb-3">Your Appointment Details</h3>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="detail-card">
+                                    <div class="detail-icon">
+                                        <i class="fas fa-cut"></i>
+                                    </div>
+                                    <div class="detail-text">
+                                        <h4>Service</h4>
+                                        <p>{{ booking.service }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="detail-card">
+                                    <div class="detail-icon">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div class="detail-text">
+                                        <h4>Barber</h4>
+                                        <p>{{ booking.barber }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="detail-card">
+                                    <div class="detail-icon">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </div>
+                                    <div class="detail-text">
+                                        <h4>Date</h4>
+                                        <p>{{ booking.date }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="detail-card">
+                                    <div class="detail-icon">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <div class="detail-text">
+                                        <h4>Time</h4>
+                                        <p>{{ booking.time }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="booking-reference mb-4">
+                        <p>Booking Reference: <strong>{{ booking.reference }}</strong></p>
+                        <p class="text-muted small">Please keep this reference for your records</p>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg me-2">
+                            <i class="fas fa-home me-2"></i>Return to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <p>Need to make changes? Contact us at <strong>(555) 123-4567</strong></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .confirmation-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    .confirmation-icon {
+        font-size: 5rem;
+        color: #28a745;
+        margin-bottom: 1.5rem;
+        animation: scale-in 0.5s ease-out;
+    }
+    
+    @keyframes scale-in {
+        0% {
+            transform: scale(0);
+            opacity: 0;
+        }
+        70% {
+            transform: scale(1.2);
+        }
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+    
+    .email-notification {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+    }
+    
+    .email-notification i {
+        font-size: 1.5rem;
+        color: var(--accent-color);
+    }
+    
+    .email-notification p {
+        margin: 0;
+    }
+    
+    .booking-details {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+    }
+    
+    .detail-card {
+        display: flex;
+        align-items: center;
+        background-color: white;
+        border-radius: 10px;
+        padding: 15px;
+        height: 100%;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+    
+    .detail-icon {
+        font-size: 1.8rem;
+        color: var(--accent-color);
+        margin-right: 15px;
+        width: 40px;
+        text-align: center;
+    }
+    
+    .detail-text h4 {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin: 0;
+    }
+    
+    .detail-text p {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0;
+    }
+    
+    .booking-reference {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+    }
+    
+    .booking-reference p {
+        margin: 0;
+    }
+    
+    .action-buttons {
+        margin-top: 2rem;
+    }
+    
+    .btn-lg {
+        padding: 12px 24px;
+        border-radius: 50px;
+    }
+</style>
+{% endblock %}
+

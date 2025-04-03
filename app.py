@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, flash, request
+from flask import Flask, render_template, redirect, url_for, flash, request, session
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta, time
@@ -13,7 +13,7 @@ from flask_mail import Mail, Message
 
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static')
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///barbershop.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -40,6 +40,35 @@ def load_user(user_id):
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/booking-confirmed')
+def booking_confirmed():
+    # Get the latest booking for the user from session
+    booking_id = session.get('last_booking_id')
+    if not booking_id:
+        return redirect(url_for('index'))
+    
+    booking = Appointment.query.filter_by(id=booking_id)\
+        .join(Customer)\
+        .join(Service)\
+        .join(Barber)\
+        .first()
+        
+    if not booking:
+        flash('Booking not found', 'error')
+        return redirect(url_for('index'))
+    
+    # Format the data for display
+    booking_data = {
+        'email': booking.customer.email,
+        'service': booking.service.name,
+        'barber': booking.barber.name,
+        'date': booking.date.strftime('%B %d, %Y'),
+        'time': booking.time.strftime('%I:%M %p'),
+        'reference': f'BK{booking.id:06d}'
+    }
+    
+    return render_template('booking_confirmed.html', booking=booking_data)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -93,8 +122,6 @@ def send_booking_emails(booking, email_type='pending'):
             #tood
         )
 
-# ...existing code...
-
 @app.route('/gallery')
 def gallery():
     # You can add these sample gallery items or load them from a database
@@ -115,73 +142,128 @@ def gallery():
 
 @app.route('/book', methods=['GET', 'POST'])
 def book():
-    form = AppointmentForm()
-    form.barber.choices = [(b.id, b.name) for b in Barber.query.all()]
-    form.service.choices = [(s.id, f"{s.name} (${s.price:.2f})") for s in Service.query.all()]
-    
-    if form.validate_on_submit():
+    if request.method == 'GET':
+        form = AppointmentForm()
+        form.barber.choices = [(b.id, b.name) for b in Barber.query.all()]
+        form.service.choices = [(s.id, f"{s.name} (${s.price:.2f})") for s in Service.query.all()]
+        return render_template('book.html', form=form)
+        
+    if request.method == 'POST':
         try:
-            # Convert time string to time object
-            hour, minute = map(int, form.time.data.split(':'))
+            # Get form data
+            name = request.form.get('name')
+            email = request.form.get('email')
+            phone = request.form.get('phone')
+            date_str = request.form.get('date')
+            time_str = request.form.get('time')
+            barber_id = int(request.form.get('barber_id'))
+            service_id = int(request.form.get('service_id'))
+            notes = request.form.get('notes', '')
+
+            # Convert date and time strings to proper formats
+            date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            hour, minute = map(int, time_str.split(':'))
             appointment_time = time(hour, minute)
-            
-            # Check if time is available
-            selected_date = form.date.data
-            barber_id = form.barber.data
-            
-            # Check existing appointments
-            existing_appointment = Appointment.query.filter_by(
-                date=selected_date,
-                time=appointment_time,
-                barber_id=barber_id,
-                status='confirmed'
-            ).first()
-            
-            # Check blocked times
-            blocked_time = BlockedTime.query.filter(
-                BlockedTime.date == selected_date,
-                BlockedTime.barber_id == barber_id,
-                BlockedTime.start_time <= appointment_time,
-                BlockedTime.end_time >= appointment_time
-            ).first()
-            
-            if existing_appointment or blocked_time:
-                flash('This time slot is no longer available. Please select another time.')
-                return render_template('book.html', form=form)
-            
-            # Create customer first
+
+            # Check availability
+            is_available = check_availability(date, appointment_time, barber_id)
+            if not is_available:
+                return jsonify({
+                    'status': 'error',
+                    'message': 'This time slot is no longer available'
+                }), 400
+
+            # Create customer
             customer = Customer(
-                name=form.name.data,
-                email=form.email.data,
-                phone=form.phone.data
+                name=name,
+                email=email,
+                phone=phone
             )
             db.session.add(customer)
-            db.session.flush()  # This assigns an ID to the customer
-            
-            # Create appointment with all required data
+            db.session.flush()
+
+            # Create appointment
             appointment = Appointment(
-                date=form.date.data,
+                date=date,
                 time=appointment_time,
-                barber_id=form.barber.data,
-                service_id=form.service.data,
+                barber_id=barber_id,
+                service_id=service_id,
                 customer=customer,
-                notes=form.notes.data
+                notes=notes
             )
             db.session.add(appointment)
             db.session.commit()
-            
+
             # Send confirmation emails
             send_booking_emails(appointment, email_type='pending')
-            
-            flash('Booking submitted! Check your email for confirmation.')
-            return redirect(url_for('index'))
-            
+
+            session['last_booking_id'] = appointment.id
+        
+            return jsonify({
+                'status': 'success',
+                'message': 'Booking confirmed!'
+            })
+
         except Exception as e:
             db.session.rollback()
-            flash('Error booking appointment. Please try again.')
             print(f"Booking error: {str(e)}")
+            return jsonify({
+                'status': 'error',
+                'message': 'Error processing booking'
+            }), 500
+
+def check_availability(date, time, barber_id):
+    """Check if the time slot is available"""
+    existing_appointment = Appointment.query.filter_by(
+        date=date,
+        time=time,
+        barber_id=barber_id,
+        status='confirmed'
+    ).first()
     
-    return render_template('book.html', form=form)
+    blocked_time = BlockedTime.query.filter(
+        BlockedTime.date == date,
+        BlockedTime.barber_id == barber_id,
+        BlockedTime.start_time <= time,
+        BlockedTime.end_time >= time
+    ).first()
+    
+    return not (existing_appointment or blocked_time)
+
+def create_appointment(date, time, barber_id, service_id, customer_name, 
+                      customer_email, customer_phone, notes=None):
+    """Create a new appointment with customer"""
+    try:
+        # Create customer first
+        customer = Customer(
+            name=customer_name,
+            email=customer_email,
+            phone=customer_phone
+        )
+        db.session.add(customer)
+        db.session.flush()
+        
+        # Create appointment
+        appointment = Appointment(
+            date=date,
+            time=time,
+            barber_id=barber_id,
+            service_id=service_id,
+            customer=customer,
+            notes=notes
+        )
+        db.session.add(appointment)
+        db.session.commit()
+        
+        # Send confirmation emails
+        send_booking_emails(appointment, email_type='pending')
+        
+        return appointment
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error creating appointment: {str(e)}")
+        return None
 
 @app.route('/dashboard')
 @login_required
@@ -346,51 +428,72 @@ def cleanup_appointments():
 # Add this import at the top
 from flask import jsonify
 
-# Add this new route before if __name__ == '__main__':
-@app.route('/get-available-times', methods=['GET'])
+@app.route('/get-available-times')
 def get_available_times():
     date = request.args.get('date')
     barber_id = request.args.get('barber_id')
-    
-    if not date or not barber_id:
-        return jsonify({'error': 'Missing parameters'}), 400
-    
+    service_id = request.args.get('service_id')
+
+    if not all([date, barber_id, service_id]):
+        return jsonify({'error': 'Missing required parameters'}), 400
+
     try:
-        selected_date = datetime.strptime(date, '%Y-%m-%d').date()
+        # Convert date string to date object
+        booking_date = datetime.strptime(date, '%Y-%m-%d').date()
         
-        # Get all appointments for this date and barber
-        booked_times = Appointment.query.filter_by(
-            date=selected_date,
-            barber_id=barber_id
-        ).filter(
-            Appointment.status.in_(['pending', 'confirmed'])  # Include both pending and confirmed
-        ).with_entities(Appointment.time).all()
-        
-        # Get blocked times
-        blocked_times = BlockedTime.query.filter_by(
-            date=selected_date,
-            barber_id=barber_id
+        # Get service duration
+        service = Service.query.get(service_id)
+        if not service:
+            return jsonify({'error': 'Service not found'}), 404
+            
+        service_duration = service.duration  # in minutes
+
+        # Get all bookings for this barber on this date
+        booked_slots = Appointment.query.filter(
+            Appointment.barber_id == barber_id,
+            Appointment.date == booking_date,
+            Appointment.status != 'cancelled'
         ).all()
+
+        # Get blocked times for this barber
+        blocked_times = BlockedTime.query.filter(
+            BlockedTime.barber_id == barber_id,
+            BlockedTime.date == booking_date
+        ).all()
+
+        # Calculate unavailable time slots
+        booked_times = set()
         
-        # Convert booked times to list of strings
-        unavailable_times = [t[0].strftime('%H:%M') for t in booked_times]
-        
-        # Add all times within blocked periods
+        for booking in booked_slots:
+            # Block the booked time and subsequent slots based on service duration
+            start_time = booking.time
+            end_time = (datetime.combine(booking_date, start_time) + 
+                       timedelta(minutes=booking.service.duration)).time()
+            
+            current = start_time
+            while current < end_time:
+                booked_times.add(current.strftime('%H:%M'))
+                current = (datetime.combine(booking_date, current) + 
+                          timedelta(minutes=30)).time()
+
+        # Add blocked times
         for block in blocked_times:
-            current_time = block.start_time
-            while current_time <= block.end_time:
-                time_str = current_time.strftime('%H:%M')
-                if time_str not in unavailable_times:
-                    unavailable_times.append(time_str)
-                # Increment by 30 minutes
-                current_datetime = datetime.combine(selected_date, current_time)
-                current_datetime += timedelta(minutes=30)
-                current_time = current_datetime.time()
-        
-        return jsonify({'booked_times': unavailable_times})
-    
+            start_time = block.start_time
+            end_time = block.end_time
+            
+            current = start_time
+            while current < end_time:
+                booked_times.add(current.strftime('%H:%M'))
+                current = (datetime.combine(booking_date, current) + 
+                          timedelta(minutes=30)).time()
+
+        return jsonify({
+            'booked_times': sorted(list(booked_times)),
+            'service_duration': service_duration
+        })
+
     except Exception as e:
-        print(f"Error getting available times: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 
 
