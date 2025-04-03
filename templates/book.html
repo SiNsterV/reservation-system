@@ -9,57 +9,117 @@
             <div class="card animated-card">
                 <div class="card-header">
                     <h4 class="mb-0">Book Your Appointment</h4>
+                    <div class="steps-progress">
+                        <div class="step active" data-step="1">1. Service</div>
+                        <div class="step" data-step="2">2. Date & Time</div>
+                        <div class="step" data-step="3">3. Details</div>
+                        <div class="step" data-step="4">4. Confirm</div>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <form method="POST">
-                        {{ form.csrf_token }}
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="date" class="form-label">Date</label>
-                                {{ form.date(class="form-control flatpickr", id="date", placeholder="Select Date") }}
+                    <!-- Step 1: Service Selection -->
+                    <div class="booking-step" id="step-1">
+                        <h3>Select a Service</h3>
+                        <div class="services-grid">
+                            {% for service in form.service.choices %}
+                            <div class="service-card" data-service-id="{{ service[0] }}">
+                                <div class="service-icon">
+                                    <i class="fas fa-cut"></i>
+                                </div>
+                                <h4>{{ service[1].split('($')[0]}}</h4>
+                                <p class="price">${{ service[1].split('$')[1].strip(')') }}</p>
+                                <button class="btn btn-primary select-service">Select</button>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="time" class="form-label">Time</label>
-                                {{ form.time(class="form-control", id="time") }}
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Date & Time Selection -->
+                    <div class="booking-step" id="step-2" style="display: none;">
+                        <h3>Choose Date & Time</h3>
+                        <div class="date-time-selection">
+                            <div class="barber-selection mb-4">
+                                <h4>Select Barber</h4>
+                                <div class="barbers-grid">
+                                    {% for barber in form.barber.choices %}
+                                    <div class="barber-card" data-barber-id="{{ barber[0] }}">
+                                        <div class="barber-avatar">
+                                            <i class="fas fa-user-circle"></i>
+                                        </div>
+                                        <h5>{{ barber[1] }}</h5>
+                                        <button class="btn btn-outline-primary select-barber">Select</button>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="date-picker-container">
+                                {{ form.date(class="form-control", id="date", placeholder="Select Date") }}
+                            </div>
+                            <div class="time-slots-container" style="display: none;">
+                                <h4>Available Times</h4>
+                                <div class="time-slots" id="time-slots"></div>
                             </div>
                         </div>
+                    </div>
 
+                    <!-- Step 3: Customer Details -->
+                    <div class="booking-step" id="step-3" style="display: none;">
+                        <h3>Your Details</h3>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="service" class="form-label">Service</label>
-                                {{ form.service(class="form-control", id="service") }}
+                                <label for="firstName">First Name</label>
+                                <input type="text" class="form-control" id="firstName" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="barber" class="form-label">Barber</label>
-                                {{ form.barber(class="form-control", id="barber") }}
+                                <label for="lastName">Last Name</label>
+                                <input type="text" class="form-control" id="lastName" required>
                             </div>
                         </div>
-
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="email">Email</label>
+                                {{ form.email(class="form-control", type="email") }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="phone">Phone</label>
+                                {{ form.phone(class="form-control", type="tel") }}
+                            </div>
+                        </div>
                         <div class="mb-3">
-                            <label for="name" class="form-label">Your Name</label>
-                            {{ form.name(class="form-control", id="name") }}
+                            <label for="notes">Special Requests (Optional)</label>
+                            {{ form.notes(class="form-control", rows="3") }}
                         </div>
+                    </div>
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                {{ form.email(class="form-control", id="email", type="email") }}
+                    <!-- Step 4: Confirmation -->
+                    <div class="booking-step" id="step-4" style="display: none;">
+                        <h3>Confirm Your Booking</h3>
+                        <div class="confirmation-details">
+                            <div class="detail-item">
+                                <span class="label">Service:</span>
+                                <span id="confirm-service"></span>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="phone" class="form-label">Phone</label>
-                                {{ form.phone(class="form-control", id="phone", type="tel", placeholder="Enter your phone number") }}
-                                <div class="form-text">Any format is accepted</div>
+                            <div class="detail-item">
+                                <span class="label">Price:</span>
+                                <span id="confirm-price"></span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Date:</span>
+                                <span id="confirm-date"></span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Time:</span>
+                                <span id="confirm-time"></span>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="mb-3">
-                            <label for="notes" class="form-label">Special Requests (Optional)</label>
-                            {{ form.notes(class="form-control", id="notes", rows="3") }}
-                        </div>
-
-                        <button type="submit" class="btn btn-primary animated-button">Book Appointment</button>
-                    </form>
+                    <!-- Navigation Buttons -->
+                    <div class="step-navigation">
+                        <button type="button" class="btn btn-secondary" id="prev-step" style="display: none;">Previous</button>
+                        <button type="button" class="btn btn-primary" id="next-step">Next</button>
+                        <button type="submit" class="btn btn-success" id="confirm-booking" style="display: none;">Confirm Booking</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -71,70 +131,245 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <script>
-    // Initialize Flatpickr for the date input
-    flatpickr("#date", {
-        minDate: "today",
-        dateFormat: "Y-m-d",
-        disableMobile: true, // Better UX on desktop
-        theme: "light" // Optional: Use a theme for better appearance
-    });
     document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
-    const timeSelect = document.getElementById('time');
-
-    // Add form submit handler
-    form.addEventListener('submit', function(e) {
-        const selectedOption = timeSelect.options[timeSelect.selectedIndex];
-        if (selectedOption.disabled) {
-            e.preventDefault();
-        }
-    });
-
-    // Clear time selection when disabled option is selected
-    timeSelect.addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-        if (selectedOption.disabled) {
-            this.value = '';
-        }
-    });
-    });
-
-    // Function to update available times
-    function updateAvailableTimes() {
-        const dateInput = document.getElementById('date');
-        const barberSelect = document.getElementById('barber');
-        const timeSelect = document.getElementById('time');
-        
-        if (!dateInput.value || !barberSelect.value) return;
-        
-        fetch(`/get-available-times?date=${dateInput.value}&barber_id=${barberSelect.value}`)
-            .then(response => response.json())
-            .then(data => {
-                const timeOptions = timeSelect.options;
-                
-                // Enable all options first
-                for (let option of timeOptions) {
-                    option.disabled = false;
+        let currentStep = 1;
+        let selectedService = null;
+        let selectedBarber = null;
+        let selectedDate = null;
+        let selectedTime = null;
+    
+        // Initialize Flatpickr
+        const datePicker = flatpickr("#date", {
+            minDate: "today",
+            dateFormat: "Y-m-d",
+            disableMobile: true,
+            disable: [
+                function(date) {
+                    return date.getDay() === 0; // Disable Sundays
                 }
-                
-                // Disable booked times
-                if (data.booked_times) {
-                    data.booked_times.forEach(time => {
-                        for (let option of timeOptions) {
-                            if (option.value === time) {
-                                option.disabled = true;
-                            }
-                        }
+            ],
+            onChange: function(selectedDates, dateStr) {
+                selectedDate = dateStr;
+                if (selectedBarber) {
+                    generateTimeSlots();
+                }
+            }
+        });
+    
+        // Service Selection
+        document.querySelectorAll('.select-service').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const serviceCard = this.closest('.service-card');
+                document.querySelectorAll('.service-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                serviceCard.classList.add('selected');
+                selectedService = {
+                    id: serviceCard.dataset.serviceId,
+                    name: serviceCard.querySelector('h4').textContent,
+                    price: serviceCard.querySelector('.price').textContent
+                };
+                goToStep(2);
+            });
+        });
+    
+        // Barber Selection
+        document.querySelectorAll('.select-barber').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const barberCard = this.closest('.barber-card');
+                document.querySelectorAll('.barber-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                barberCard.classList.add('selected');
+                selectedBarber = barberCard.dataset.barberId;
+                document.querySelector('.time-slots-container').style.display = 'block';
+                if (selectedDate) {
+                    generateTimeSlots();
+                }
+            });
+        });
+    
+        // Generate Time Slots
+        async function generateTimeSlots() {
+    const timeSlotsContainer = document.getElementById('time-slots');
+    timeSlotsContainer.innerHTML = '<div class="spinner-border" role="status"></div>';
+
+    try {
+        // Add service_id to check duration conflicts
+        const response = await fetch(`/get-available-times?date=${selectedDate}&barber_id=${selectedBarber}&service_id=${selectedService.id}`);
+        const data = await response.json();
+        
+        const timeSlots = [
+            "9:00", "9:30", "10:00", "10:30", 
+            "11:00", "11:30", "12:00", "12:30",
+            "13:00", "13:30", "14:00", "14:30",
+            "15:00", "15:30", "16:00", "16:30",
+            "17:00"
+        ];
+
+        timeSlotsContainer.innerHTML = '';
+        timeSlots.forEach(time => {
+            const button = document.createElement('button');
+            button.className = 'time-slot btn';
+            button.textContent = time;
+            
+            // Check if time is booked for this specific barber
+            if (data.booked_times && data.booked_times.includes(time)) {
+                button.classList.add('disabled');
+                button.disabled = true;
+                button.title = 'Not available';
+            } else {
+                button.addEventListener('click', () => {
+                    document.querySelectorAll('.time-slot').forEach(slot => {
+                        slot.classList.remove('selected');
                     });
-                }
-            })
-            .catch(error => console.error('Error:', error));
+                    button.classList.add('selected');
+                    selectedTime = time;
+                });
+            }
+            
+            timeSlotsContainer.appendChild(button);
+        });
+    } catch (error) {
+        console.error('Error:', error);
+        timeSlotsContainer.innerHTML = '<p class="text-danger">Error loading time slots</p>';
     }
+}
+    
+        // Navigation
+        const prevButton = document.getElementById('prev-step');
+        const nextButton = document.getElementById('next-step');
+        const confirmButton = document.getElementById('confirm-booking');
+    
+        prevButton.addEventListener('click', () => {
+            goToStep(currentStep - 1);
+        });
+    
+        nextButton.addEventListener('click', () => {
+            if (validateStep(currentStep)) {
+                goToStep(currentStep + 1);
+            }
+        });
+    
+        // Replace the existing confirmButton click handler
+confirmButton.addEventListener('click', async (e) => {
+    e.preventDefault();
+    if (validateStep(4)) {
+        try {
+            // Create form data object
+            const formData = new FormData();
+            formData.append('service_id', selectedService.id);
+            formData.append('barber_id', selectedBarber);
+            formData.append('date', selectedDate);
+            formData.append('time', selectedTime);
+            formData.append('name', `${document.getElementById('firstName').value} ${document.getElementById('lastName').value}`);
+            formData.append('email', document.getElementById('email').value);
+            formData.append('phone', document.getElementById('phone').value);
+            formData.append('notes', document.getElementById('notes').value);
 
-    // Add event listeners
-    document.getElementById('date').addEventListener('change', updateAvailableTimes);
-    document.getElementById('barber').addEventListener('change', updateAvailableTimes);
-</script>
+            // Send as form data instead of JSON
+            const response = await fetch('/book', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            if (result.status === 'success') {
+                showNotification('Booking confirmed! Check your email for details.', 'success');
+                setTimeout(() => {
+                    window.location.href = '/booking-confirmed';
+                }, 2000);
+            } else {
+                throw new Error(result.message || 'Booking failed');
+            }
+        } catch (error) {
+            console.error('Booking error:', error);
+            showNotification('Error making booking: ' + error.message, 'error');
+        }
+    }
+});
+    
+        function validateStep(step) {
+            switch(step) {
+                case 1:
+                    if (!selectedService) {
+                        showNotification('Please select a service', 'error');
+                        return false;
+                    }
+                    return true;
+                case 2:
+                    if (!selectedBarber || !selectedDate || !selectedTime) {
+                        showNotification('Please select a barber, date and time', 'error');
+                        return false;
+                    }
+                    return true;
+                case 3:
+                    const required = ['firstName', 'lastName', 'email', 'phone'];
+                    for (const field of required) {
+                        if (!document.getElementById(field).value) {
+                            showNotification('Please fill in all required fields', 'error');
+                            return false;
+                        }
+                    }
+                    return true;
+                case 4:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+    
+        function goToStep(step) {
+            if (step < 1 || step > 4) return;
+    
+            document.querySelectorAll('.booking-step').forEach(s => {
+                s.style.display = 'none';
+            });
+            document.getElementById(`step-${step}`).style.display = 'block';
+    
+            // Update progress indicators
+            document.querySelectorAll('.step').forEach(s => {
+                s.classList.remove('active');
+                if (parseInt(s.dataset.step) <= step) {
+                    s.classList.add('active');
+                }
+            });
+    
+            // Update navigation buttons
+            prevButton.style.display = step > 1 ? 'block' : 'none';
+            nextButton.style.display = step < 4 ? 'block' : 'none';
+            confirmButton.style.display = step === 4 ? 'block' : 'none';
+    
+            // Update confirmation details if on last step
+            if (step === 4) {
+                document.getElementById('confirm-service').textContent = selectedService.name;
+                document.getElementById('confirm-price').textContent = selectedService.price;
+                document.getElementById('confirm-date').textContent = selectedDate;
+                document.getElementById('confirm-time').textContent = selectedTime;
+            }
+    
+            currentStep = step;
+        }
+    
+        function showNotification(message, type = 'error') {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'error' ? 'danger' : 'success'} notification`;
+            notification.textContent = message;
+            
+            document.querySelector('.card-body').insertBefore(notification, document.querySelector('.card-body').firstChild);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+    });
+    </script>
 
 <style>
     /* Modern card animation */

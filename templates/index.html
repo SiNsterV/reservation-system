@@ -1,63 +1,170 @@
 {% extends "base.html" %}
 
-{% block title %}Welcome to Barber Shop{% endblock %}
+{% block title %}ClipMaster Barber Shop{% endblock %}
 
 {% block content %}
-<div class="hero text-center">
-    <div class="container">
-        <h1 class="display-4">Welcome to Barber Shop</h1>
-        <p class="lead">Professional haircuts and grooming services for the modern gentleman</p>
-        <a href="{{ url_for('book') }}" class="btn btn-primary btn-lg">Book Now</a>
-    </div>
-</div>
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-content">
+    <h1>Premium Haircuts & Styling</h1>
+    <p>Experience the art of grooming with our expert barbers</p>
+    <a href="{{ url_for('book') }}" class="btn btn-primary btn-large">Book Your Appointment</a>
+  </div>
+</section>
 
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-md-4 mb-4">
-            <div class="card h-100">
-                <div class="card-body text-center">
-                    <i class="bi bi-scissors fs-1 text-primary mb-3"></i>
-                    <h3 class="card-title">Haircuts</h3>
-                    <p class="card-text">Professional haircuts tailored to your style and preferences.</p>
-                </div>
-            </div>
+<!-- Services Section -->
+<section id="services" class="services">
+  <div class="container">
+    <h2>Our Services</h2>
+    <div class="services-grid">
+      <div class="service-card">
+        <h3>Classic Haircut</h3>
+        <p class="price">$25</p>
+        <p class="description">Traditional haircut with clippers and scissors</p>
+        <div class="service-time">
+          <i class="fas fa-clock"></i>
+          <span>30 min</span>
         </div>
-        <div class="col-md-4 mb-4">
-            <div class="card h-100">
-                <div class="card-body text-center">
-                    <i class="bi bi-brush fs-1 text-primary mb-3"></i>
-                    <h3 class="card-title">Beard Trim</h3>
-                    <p class="card-text">Expert beard grooming and styling services.</p>
-                </div>
-            </div>
+        <a href="{{ url_for('book', service='Classic Haircut') }}" class="btn btn-primary">Book Now</a>
+      </div>
+      <div class="service-card">
+        <h3>Beard Trim</h3>
+        <p class="price">$15</p>
+        <p class="description">Shape and style your beard for a clean look</p>
+        <div class="service-time">
+          <i class="fas fa-clock"></i>
+          <span>20 min</span>
         </div>
-        <div class="col-md-4 mb-4">
-            <div class="card h-100">
-                <div class="card-body text-center">
-                    <i class="bi bi-calendar-check fs-1 text-primary mb-3"></i>
-                    <h3 class="card-title">Easy Booking</h3>
-                    <p class="card-text">Book your appointment online with just a few clicks.</p>
-                </div>
-            </div>
+        <a href="{{ url_for('book', service='Beard Trim') }}" class="btn btn-primary">Book Now</a>
+      </div>
+      <div class="service-card">
+        <h3>Premium Package</h3>
+        <p class="price">$45</p>
+        <p class="description">Haircut, beard trim, and hot towel treatment</p>
+        <div class="service-time">
+          <i class="fas fa-clock"></i>
+          <span>60 min</span>
         </div>
+        <a href="{{ url_for('book', service='Premium Package') }}" class="btn btn-primary">Book Now</a>
+      </div>
     </div>
+  </div>
+</section>
 
-    <div class="row mt-5">
-        <div class="col-md-6">
-            <h2>Why Choose Us?</h2>
-            <ul class="list-unstyled">
-                <li><i class="bi bi-check2-circle text-success"></i> Experienced professional barbers</li>
-                <li><i class="bi bi-check2-circle text-success"></i> Clean and modern facility</li>
-                <li><i class="bi bi-check2-circle text-success"></i> Convenient online booking</li>
-                <li><i class="bi bi-check2-circle text-success"></i> Competitive prices</li>
-            </ul>
-        </div>
-        <div class="col-md-6">
-            <h2>Our Location</h2>
-            <div class="ratio ratio-16x9">
-                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3024.2219901290355!2d-74.00369368400567!3d40.71312937933185!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25a23e28c1191%3A0x49f75d3281df052a!2s150%20Park%20Row%2C%20New%20York%2C%20NY%2010007!5e0!3m2!1sen!2sus!4v1644115241595!5m2!1sen!2sus" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
-            </div>
-        </div>
+<!-- About Section -->
+<section id="about" class="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-image">
+        <img src="{{ url_for('static', filename='images/barber-at-work.jpg') }}" alt="Barber at work">
+      </div>
+      <div class="about-content">
+        <h2>About ClipMaster</h2>
+        <p>Founded in 2010, ClipMaster has been providing premium grooming services to our clients for over a decade.</p>
+        <p>Our team of skilled barbers combines traditional techniques with modern styles to give you the perfect look.</p>
+        <p>We pride ourselves on creating a welcoming atmosphere where you can relax and enjoy the experience.</p>
+        <a href="{{ url_for('book') }}" class="btn btn-primary">Experience It Yourself</a>
+      </div>
     </div>
-</div>
-{% endblock %} 
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section id="testimonials" class="testimonials">
+  <div class="container">
+    <h2>What Our Clients Say</h2>
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="stars">
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+        </div>
+        <p class="quote">"Best haircut I've ever had. The attention to detail is amazing."</p>
+        <p class="author">— John D.</p>
+      </div>
+      <div class="testimonial-card">
+        <div class="stars">
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+        </div>
+        <p class="quote">"Great atmosphere and professional service. I'm a regular now!"</p>
+        <p class="author">— Michael S.</p>
+      </div>
+      <div class="testimonial-card">
+        <div class="stars">
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="fas fa-star"></i>
+          <i class="far fa-star"></i>
+        </div>
+        <p class="quote">"Friendly staff and excellent service. Highly recommended!"</p>
+        <p class="author">— Robert T.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contact Section -->
+<section id="contact" class="contact">
+  <div class="container">
+    <h2>Visit Us</h2>
+    <div class="contact-grid">
+      <div class="contact-info">
+        <div class="info-item">
+          <i class="fas fa-map-marker-alt"></i>
+          <div>
+            <h3>Location</h3>
+            <p>123 Main Street, Anytown, USA</p>
+          </div>
+        </div>
+        <div class="info-item">
+          <i class="fas fa-clock"></i>
+          <div>
+            <h3>Hours</h3>
+            <p>Monday - Friday: 9am - 7pm</p>
+            <p>Saturday: 10am - 6pm</p>
+            <p>Sunday: Closed</p>
+          </div>
+        </div>
+        <div class="info-item">
+          <i class="fas fa-phone"></i>
+          <div>
+            <h3>Contact</h3>
+            <p>(555) 123-4567</p>
+            <p>{{ contact_email }}</p>
+          </div>
+        </div>
+        <a href="{{ url_for('book') }}" class="btn btn-primary btn-large">Book Your Appointment</a>
+      </div>
+      <div class="contact-map">
+        <img src="{{ url_for('static', filename='images/map-location.jpg') }}" alt="Map location">
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Set current year in footer
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+    
+    // Mobile menu toggle (for smaller screens)
+    const header = document.querySelector('.header');
+    
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 50) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    });
+  });
+</script>
+{% endblock %}
